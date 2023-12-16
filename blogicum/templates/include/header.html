@@ -1,0 +1,42 @@
+{% load static %}
+{% url 'blog:index' as index_url %}
+{% url 'pages:about' as about_url %}
+{% url 'pages:rules' as rules_url %}
+
+<header>
+  <nav class="navbar navbar-light" style="background-color: lightskyblue">
+    <div class="container">
+      <a class="navbar-brand" href="{{ index_url }}">
+        <img src="{% static 'img/logo.png' %}"
+             width="30"
+             height="30"
+             class="d-inline-block align-top"
+             alt=""
+        >
+        Блогикум
+      </a>
+      <ul class="nav  nav-pills">
+        {% with request.path as relate_path %}
+          <li class="nav-item">
+            <a class="nav-link {% if index_url == relate_path %} active {% endif %}"
+               href="{{ index_url }}">
+              Лента записей
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link{% if about_url == relate_path %} active {% endif %}"
+               href="{{ about_url }}">
+              О проекте
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link{% if rules_url == relate_path %} active {% endif %}"
+               href="{{ rules_url }}">
+              Наши правила
+            </a>
+          </li>
+        {% endwith %}
+      </ul>
+    </div>
+  </nav>
+</header>
