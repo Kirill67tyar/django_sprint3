@@ -9,49 +9,52 @@ from blog.models import (
 )
 
 
+QUANTITY_POSTS = slice(5)
+
+
 def index(request):
-    posts_qs = Post.valid_posts.all()[:5]
+    posts_qs = Post.valid_posts.all()[QUANTITY_POSTS]
     context = {
         'post_list': posts_qs,
     }
-    return render(request,
-                  'blog/index.html',
-                  context,
-                  )
+    return render(
+        request,
+        'blog/index.html',
+        context,
+    )
 
 
-def post_detail(request, pk):
+def post_detail(request, post_id):
     posts_qs = Post.valid_posts.all()
     post = get_object_or_404(
-        klass=posts_qs,
-        pk=pk,
+        posts_qs,
+        pk=post_id,
     )
     context = {
         'post': post,
     }
-    return render(request,
-                  'blog/detail.html',
-                  context
-                  )
+    return render(
+        request,
+        'blog/detail.html',
+        context,
+    )
 
 
 def category_posts(request, category_slug):
-    category_qs = Category.objects.filter(
+    category = get_object_or_404(
+        Category,
         slug=category_slug,
         is_published=True,
     )
     post_list = Post.valid_posts.filter(
-        category__slug=category_slug,
-    )
-    category = get_object_or_404(
-        klass=category_qs,
-        slug=category_slug,
+        category=category,
     )
     context = {
         'category': category,
         'post_list': post_list,
     }
-    return render(request,
-                  'blog/category.html',
-                  context
-                  )
+    return render(
+        request,
+        'blog/category.html',
+        context,
+    )

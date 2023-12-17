@@ -2,53 +2,15 @@ import datetime as dt
 
 from django.db import models
 from django.contrib.auth import get_user_model
-from django.utils.text import slugify
 
-from blog.utils import from_cyrillic_to_eng
 
 User = get_user_model()
+DATETIME_NOW = dt.datetime.now()
+MAX_LENGTH = 256
+RELATED_NAME_TO_POSTS = 'posts'
 
 
-class ValidPostsManager(models.Manager):
-    def get_queryset(self):
-        query = super().get_queryset().filter(
-            pub_date__lte=dt.datetime.now(),
-            is_published=True,
-            category__is_published=True,
-        ).select_related('location', 'author')
-        return query
-
-
-class Post(models.Model):
-    title = models.CharField(
-        max_length=256,
-        verbose_name='Заголовок',
-    )
-    text = models.TextField(
-        verbose_name='Текст',
-    )
-    pub_date = models.DateTimeField(
-        verbose_name='Дата и время публикации',
-        help_text=('Если установить дату и время в будущем'
-                   ' — можно делать отложенные публикации.')
-    )
-    author = models.ForeignKey(
-        to=User,
-        on_delete=models.CASCADE,
-        verbose_name='Автор публикации',
-    )
-    location = models.ForeignKey(
-        to='blog.Location',
-        on_delete=models.SET_NULL,
-        null=True,
-        verbose_name='Местоположение',
-    )
-    category = models.ForeignKey(
-        to='blog.Category',
-        on_delete=models.SET_NULL,
-        null=True,
-        verbose_name='Категория',
-    )
+class PublishedWithTimeStampModel(models.Model):
     is_published = models.BooleanField(
         default=True,
         verbose_name='Опубликовано',
@@ -58,17 +20,71 @@ class Post(models.Model):
         auto_now_add=True,
         verbose_name='Добавлено',
     )
+
+    class Meta:
+        abstract = True
+
+
+class ValidPostsManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            pub_date__lte=DATETIME_NOW,
+            is_published=True,
+            category__is_published=True,
+        ).select_related('location', 'author', 'category',)
+
+
+class Post(PublishedWithTimeStampModel):
+    title = models.CharField(
+        max_length=MAX_LENGTH,
+        verbose_name='Заголовок',
+    )
+    text = models.TextField(
+        verbose_name='Текст',
+    )
+    pub_date = models.DateTimeField(
+        verbose_name='Дата и время публикации',
+        help_text=(
+            'Если установить дату и время в будущем'
+            ' — можно делать отложенные публикации.'
+        )
+    )
+    author = models.ForeignKey(
+        to=User,
+        on_delete=models.CASCADE,
+        related_name=RELATED_NAME_TO_POSTS,
+        verbose_name='Автор публикации',
+    )
+    location = models.ForeignKey(
+        to='blog.Location',
+        on_delete=models.SET_NULL,
+        related_name=RELATED_NAME_TO_POSTS,
+        null=True,
+        verbose_name='Местоположение',
+    )
+    category = models.ForeignKey(
+        to='blog.Category',
+        on_delete=models.SET_NULL,
+        related_name=RELATED_NAME_TO_POSTS,
+        null=True,
+        verbose_name='Категория',
+    )
+
     objects = models.Manager()
     valid_posts = ValidPostsManager()
 
     class Meta:
         verbose_name = 'публикация'
         verbose_name_plural = 'Публикации'
+        ordering = ('pub_date', 'title',)
+
+    def __str__(self):
+        return self.title
 
 
-class Category(models.Model):
+class Category(PublishedWithTimeStampModel):
     title = models.CharField(
-        max_length=256,
+        max_length=MAX_LENGTH,
         verbose_name='Заголовок',
     )
     description = models.TextField(
@@ -77,8 +93,10 @@ class Category(models.Model):
     slug = models.SlugField(
         unique=True,
         verbose_name='Идентификатор',
-        help_text=('Идентификатор страницы для URL; разрешены'
-                   ' символы латиницы, цифры, дефис и подчёркивание.')
+        help_text=(
+            'Идентификатор страницы для URL; разрешены'
+            ' символы латиницы, цифры, дефис и подчёркивание.'
+        )
     )
     is_published = models.BooleanField(
         default=True,
@@ -94,19 +112,13 @@ class Category(models.Model):
         verbose_name = 'категория'
         verbose_name_plural = 'Категории'
 
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(
-                from_cyrillic_to_eng(
-                    text=str(self.title)
-                )
-            )
-        super().save(*args, **kwargs)
+    def __str__(self):
+        return self.title
 
 
-class Location(models.Model):
+class Location(PublishedWithTimeStampModel):
     name = models.CharField(
-        max_length=256,
+        max_length=MAX_LENGTH,
         verbose_name='Название места',
     )
     is_published = models.BooleanField(
@@ -122,3 +134,6 @@ class Location(models.Model):
     class Meta:
         verbose_name = 'местоположение'
         verbose_name_plural = 'Местоположения'
+
+    def __str__(self):
+        return self.name
