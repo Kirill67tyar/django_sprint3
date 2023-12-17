@@ -161,3 +161,6 @@ blogicum/pages/admin.py
 blogicum/pages/models.py
 blogicum/pages/tests.py
 blogicum/pages/views.py
+
+# old templates
+templates/
