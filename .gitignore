@@ -148,5 +148,16 @@ dmypy.json
 # папки со статикой и медиа
 media/
 
+# draft
+tz_media/
 hot-keys.txt
 draft.txt
+
+# from blog
+blogicum/blog/tests.py
+
+# from pages
+blogicum/pages/admin.py
+blogicum/pages/models.py
+blogicum/pages/tests.py
+blogicum/pages/views.py

@@ -1,19 +1,19 @@
-# from django.shortcuts import render
+from django.shortcuts import render
 
 
-# def about(request):
-#     context = {}
-#     return render(
-#         request=request,
-#         template_name='pages/about.html',
-#         context=context
-#     )
+def about(request):
+    context = {}
+    return render(
+        request=request,
+        template_name='pages/about.html',
+        context=context
+    )
 
 
-# def rules(request):
-#     context = {}
-#     return render(
-#         request=request,
-#         template_name='pages/rules.html',
-#         context=context
-#     )
+def rules(request):
+    context = {}
+    return render(
+        request=request,
+        template_name='pages/rules.html',
+        context=context
+    )
