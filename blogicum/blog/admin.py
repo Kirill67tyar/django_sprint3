@@ -23,7 +23,7 @@ class PostAdmin(admin.ModelAdmin):
         'category',
     )
     list_filter = (
-        'authot',
+        'author',
         'category',
         'is_published',
     )

@@ -9,11 +9,11 @@ from blog.models import (
 )
 
 
-QUANTITY_POSTS = slice(5)
+QUANTITY_POSTS = 5
 
 
 def index(request):
-    posts_qs = Post.valid_posts.all()[QUANTITY_POSTS]
+    posts_qs = Post.valid_posts.all()[:QUANTITY_POSTS]
     context = {
         'post_list': posts_qs,
     }
